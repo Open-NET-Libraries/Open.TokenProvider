@@ -9,7 +9,7 @@
 		<AnalysisLevel>latest</AnalysisLevel>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<Authors>electricessence</Authors>
-		<Description>A simple and robust token provider with a customizable base class.</Description>
+		<Description>A simple interface and implementation for properly requesting and managing tokens.</Description>
 		<Copyright>© electricessence (Oren F.) All rights reserved.</Copyright>
 		<PackageProjectUrl>https://github.com/Open-NET-Libraries/Open.TokenProvider</PackageProjectUrl>
 		<RepositoryUrl>https://github.com/Open-NET-Libraries/Open.TokenProvider</RepositoryUrl>
