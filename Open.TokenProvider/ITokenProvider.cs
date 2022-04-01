@@ -1,56 +1,99 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 
+[assembly:CLSCompliant(true)]
 namespace Open.TokenProvider;
 
-public interface ITokenProvider<TToken>
+/// <summary>
+/// Represents a provider for acquiring tokens.
+/// </summary>
+public interface ITokenProvider<T>
 {
-	Task<IToken<TToken>> CurrentToken { get; }
+    /// <summary>
+    /// The most recently available token.
+    /// </summary>
+    Task<IToken<T>> CurrentToken { get; }
 
-	Task<IToken<TToken>> Refresh(DateTimeOffset timestamp);
+    /// <summary>
+    /// Updates the current token if the timestamp is greater than the current one.
+    /// </summary>
+    /// <param name="timestamp">The <see cref="DateTimeOffset"/> to compare against the current token.</param>
+    /// <returns>A valid token that is at least as fresh as the timestamp.</returns>
+    Task<IToken<T>> GetTokenAsync(DateTimeOffset timestamp);
 }
 
+/// <summary>
+/// Extensions for <see cref="ITokenProvider{T}"/>.
+/// </summary>
 public static class TokenProviderExtensions
 {
-	public static async Task Attempt<TToken>(
-	this ITokenProvider<TToken> provider,
-	Func<TToken, Task> handler)
-	{
-		if (provider is null) throw new ArgumentNullException(nameof(provider));
-		if (handler is null) throw new ArgumentNullException(nameof(handler));
+    /// <inheritdoc cref="ITokenProvider{T}.GetTokenAsync(DateTimeOffset)"/>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static Task<IToken<T>> GetTokenAsync<T>(
+        this ITokenProvider<T> provider,
+        IToken<T> previousToken)
+    {
+        if (provider is null)
+            throw new ArgumentNullException(nameof(provider));
+        if (previousToken is null)
+            throw new ArgumentNullException(nameof(previousToken));
 
-		var token = await provider.CurrentToken;
+        return provider.GetTokenAsync(previousToken.Timestamp);
+    }
 
-		try
-		{
-			await handler(token.Value);
-		}
-		catch
-		{
-			token = await provider.Refresh(token.Timestamp);
-			// Try 1 extra time because the curren token might have been stale.
-			await handler(token.Value);
-		}
-	}
+    /// <summary>
+    /// Provides the current token to the <paramref name="handler"/>.
+    /// If the <paramref name="handler"/> throws an exception,
+    /// a new token is acquired and the handler is invoked a second time with the new token.
+    /// </summary>
+    /// <exception cref="ArgumentNullException">If either the provider or the handler are null.</exception>
+    public static async Task Attempt<T>(
+        this ITokenProvider<T> provider,
+        Func<T, Task> handler)
+    {
+        if (provider is null) throw new ArgumentNullException(nameof(provider));
+        if (handler is null) throw new ArgumentNullException(nameof(handler));
 
-	public static async Task<T> Attempt<TToken, T>(
-		this ITokenProvider<TToken> provider,
-		Func<TToken, Task<T>> handler)
-	{
-		if (provider is null) throw new ArgumentNullException(nameof(provider));
-		if (handler is null) throw new ArgumentNullException(nameof(handler));
+        var token = await provider.CurrentToken.ConfigureAwait(false);
 
-		var token = await provider.CurrentToken;
+        try
+        {
+            await handler(token.Value).ConfigureAwait(false);
+            return;
+        }
+        catch
+        {
+            var newToken = await provider.GetTokenAsync(token.Timestamp).ConfigureAwait(false);
+            if (token == newToken) throw; // If by chance there's no difference, then no need to retry.
+            token = newToken;
+        }
 
-		try
-		{
-			return await handler(token.Value);
-		}
-		catch
-		{
-			token = await provider.Refresh(token.Timestamp);
-			// Try 1 extra time because the curren token might have been stale.
-			return await handler(token.Value);
-		}
-	}
+        // Try 1 extra time because the current token might have been stale.
+        await handler(token.Value).ConfigureAwait(false);
+    }
+
+    /// <inheritdoc cref="Attempt{T}(ITokenProvider{T}, Func{T, Task})"/>
+    public static async Task<TResult> Attempt<T, TResult>(
+        this ITokenProvider<T> provider,
+        Func<T, Task<TResult>> handler)
+    {
+        if (provider is null) throw new ArgumentNullException(nameof(provider));
+        if (handler is null) throw new ArgumentNullException(nameof(handler));
+
+        var token = await provider.CurrentToken.ConfigureAwait(false);
+
+        try
+        {
+            return await handler(token.Value).ConfigureAwait(false);
+        }
+        catch
+        {
+            var newToken = await provider.GetTokenAsync(token.Timestamp).ConfigureAwait(false);
+            if (token == newToken) throw; // If by chance there's no difference, then no need to retry.
+            token = newToken;
+        }
+
+        return await handler(token.Value).ConfigureAwait(false);
+    }
 }

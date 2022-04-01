@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.1.32319.34
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Open.TokenProvider", "Open.TokenProvider\Open.TokenProvider.csproj", "{44536676-5ED2-4AD5-905D-0A15DAE5FF30}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Open.TokenProvider", "Open.TokenProvider\Open.TokenProvider.csproj", "{44536676-5ED2-4AD5-905D-0A15DAE5FF30}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Open.TokenProvider.Tests", "Open.TokenProvider.Tests\Open.TokenProvider.Tests.csproj", "{70E68EDD-BA8A-4879-8FFA-4F30DFF53347}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{44536676-5ED2-4AD5-905D-0A15DAE5FF30}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{44536676-5ED2-4AD5-905D-0A15DAE5FF30}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{44536676-5ED2-4AD5-905D-0A15DAE5FF30}.Release|Any CPU.Build.0 = Release|Any CPU
+		{70E68EDD-BA8A-4879-8FFA-4F30DFF53347}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{70E68EDD-BA8A-4879-8FFA-4F30DFF53347}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{70E68EDD-BA8A-4879-8FFA-4F30DFF53347}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{70E68EDD-BA8A-4879-8FFA-4F30DFF53347}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

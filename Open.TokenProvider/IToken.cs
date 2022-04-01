@@ -1,11 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace Open.TokenProvider;
 
-public interface IToken<TToken>
+/// <summary>
+/// Represents a token value with a timestamp of when the token was acquired.
+/// </summary>
+public interface IToken<T>
 {
-	TToken Value { get; }
+    /// <summary>
+    /// The value of the token.
+    /// </summary>
+    T Value { get; }
+
+    /// <summary>
+    /// When the token was acquired.
+    /// </summary>
 	DateTimeOffset Timestamp { get; }
 }
